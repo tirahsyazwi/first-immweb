@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { motion, useScroll, useTransform, AnimatePresence } from 'motion/react';
+import { motion, useScroll, useTransform, AnimatePresence, useSpring } from 'motion/react';
 import Lenis from 'lenis';
 import { 
   ArrowRight, 
@@ -151,7 +151,49 @@ const Navbar = () => {
   );
 };
 
+const Magnetic = ({ children }: { children: React.ReactNode }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = React.useState({ x: 0, y: 0 });
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    const { clientX, clientY } = e;
+    const { left, top, width, height } = ref.current?.getBoundingClientRect() || { left: 0, top: 0, width: 0, height: 0 };
+    const x = clientX - (left + width / 2);
+    const y = clientY - (top + height / 2);
+    setPosition({ x: x * 0.3, y: y * 0.3 });
+  };
+
+  const handleMouseLeave = () => {
+    setPosition({ x: 0, y: 0 });
+  };
+
+  return (
+    <motion.div
+      ref={ref}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      animate={{ x: position.x, y: position.y }}
+      transition={{ type: "spring", stiffness: 150, damping: 15, mass: 0.1 }}
+    >
+      {children}
+    </motion.div>
+  );
+};
+
 const Hero = () => {
+  const { scrollY } = useScroll();
+  
+  // Use springs for smoother scroll-linked animations
+  const smoothScrollY = useSpring(scrollY, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  });
+
+  const y1 = useTransform(smoothScrollY, [0, 500], [0, 200]);
+  const y2 = useTransform(smoothScrollY, [0, 500], [0, -100]);
+  const rotate = useTransform(smoothScrollY, [0, 500], [0, 5]);
+
   return (
     <section className="relative min-h-screen flex items-center pt-20 overflow-hidden bg-brand-surface">
       <div className="container mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center relative z-10">
@@ -159,24 +201,74 @@ const Hero = () => {
           initial={{ opacity: 0, x: -30 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8 }}
+          style={{ y: y2 }}
         >
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-brand-accent text-xs font-bold uppercase tracking-wider mb-6">
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-brand-accent text-xs font-bold uppercase tracking-wider mb-6"
+          >
             <CheckCircle2 className="w-4 h-4" />
             <span>Trusted by Fortune 500 Companies</span>
-          </div>
-          <h1 className="text-5xl md:text-7xl font-extrabold text-brand-text leading-[1.1] mb-8">
-            Strategic Excellence for the <span className="text-brand-accent">Digital Age.</span>
+          </motion.div>
+          
+          <h1 className="text-5xl md:text-7xl font-extrabold text-brand-text leading-[1.1] mb-8 overflow-hidden">
+            {["Strategic", "Excellence", "for", "the", "Digital", "Age."].map((word, i) => (
+              <motion.span
+                key={i}
+                initial={{ y: "100%" }}
+                animate={{ y: 0 }}
+                transition={{ 
+                  duration: 0.8, 
+                  delay: 0.3 + i * 0.1, 
+                  ease: [0.22, 1, 0.36, 1] 
+                }}
+                className="inline-block mr-[0.2em]"
+              >
+                {word === "Digital" || word === "Age." ? (
+                  <span className="text-brand-accent">{word}</span>
+                ) : word}
+              </motion.span>
+            ))}
           </h1>
-          <p className="text-xl text-brand-muted leading-relaxed mb-10 max-w-xl">
+          
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1, duration: 0.8 }}
+            className="text-xl text-brand-muted leading-relaxed mb-10 max-w-xl"
+          >
             We partner with visionary leaders to solve their most complex challenges and drive sustainable growth through innovation and strategy.
-          </p>
+          </motion.p>
+          
           <div className="flex flex-wrap gap-4">
-            <button className="px-8 py-4 bg-brand-accent text-white rounded-xl font-bold text-lg hover:bg-blue-700 transition-all shadow-lg shadow-blue-200">
-              Our Solutions
-            </button>
-            <button className="px-8 py-4 bg-white text-brand-text border border-brand-border rounded-xl font-bold text-lg hover:bg-brand-surface transition-all">
-              View Case Studies
-            </button>
+            <Magnetic>
+              <motion.button 
+                whileHover={{ 
+                  scale: 1.05, 
+                  backgroundColor: '#1d4ed8',
+                  boxShadow: "0 20px 25px -5px rgb(37 99 235 / 0.3)"
+                }}
+                whileTap={{ scale: 0.95 }}
+                className="px-8 py-4 bg-brand-accent text-white rounded-xl font-bold text-lg transition-all shadow-lg shadow-blue-200"
+              >
+                Our Solutions
+              </motion.button>
+            </Magnetic>
+            <Magnetic>
+              <motion.button 
+                whileHover={{ 
+                  scale: 1.05, 
+                  backgroundColor: '#f1f5f9',
+                  borderColor: '#2563eb'
+                }}
+                whileTap={{ scale: 0.95 }}
+                className="px-8 py-4 bg-white text-brand-text border border-brand-border rounded-xl font-bold text-lg transition-all"
+              >
+                View Case Studies
+              </motion.button>
+            </Magnetic>
           </div>
         </motion.div>
 
@@ -184,6 +276,7 @@ const Hero = () => {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1, delay: 0.2 }}
+          style={{ y: y1, rotate }}
           className="relative"
         >
           <div className="relative z-10 rounded-3xl overflow-hidden shadow-2xl">
@@ -195,8 +288,16 @@ const Hero = () => {
             />
           </div>
           {/* Decorative elements */}
-          <div className="absolute -top-10 -right-10 w-40 h-40 bg-blue-100 rounded-full blur-3xl opacity-60" />
-          <div className="absolute -bottom-10 -left-10 w-60 h-60 bg-blue-50 rounded-full blur-3xl opacity-60" />
+          <motion.div 
+            animate={{ scale: [1, 1.1, 1] }}
+            transition={{ repeat: Infinity, duration: 5 }}
+            className="absolute -top-10 -right-10 w-40 h-40 bg-blue-100 rounded-full blur-3xl opacity-60" 
+          />
+          <motion.div 
+            animate={{ scale: [1, 1.2, 1] }}
+            transition={{ repeat: Infinity, duration: 7 }}
+            className="absolute -bottom-10 -left-10 w-60 h-60 bg-blue-50 rounded-full blur-3xl opacity-60" 
+          />
           
           <motion.div 
             animate={{ y: [0, -10, 0] }}
@@ -217,7 +318,10 @@ const Hero = () => {
       </div>
 
       {/* Background patterns */}
-      <div className="absolute top-0 right-0 w-1/2 h-full bg-blue-50/30 -skew-x-12 translate-x-1/4 z-0" />
+      <motion.div 
+        style={{ y: y1 }}
+        className="absolute top-0 right-0 w-1/2 h-full bg-blue-50/30 -skew-x-12 translate-x-1/4 z-0" 
+      />
     </section>
   );
 };
@@ -229,8 +333,14 @@ const CaseStudyCard = ({ study, index }: any) => {
     offset: ["start end", "end start"]
   });
 
-  const y = useTransform(scrollYProgress, [0, 1], [50, -50]);
-  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [0.95, 1, 0.95]);
+  const smoothProgress = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  });
+
+  const y = useTransform(smoothProgress, [0, 1], [50, -50]);
+  const scale = useTransform(smoothProgress, [0, 0.5, 1], [0.95, 1, 0.95]);
 
   return (
     <motion.div 
@@ -238,9 +348,10 @@ const CaseStudyCard = ({ study, index }: any) => {
       style={{ scale }}
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -10, boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.15)" }}
       viewport={{ once: true, margin: "-100px" }}
       transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-      className="group relative overflow-hidden rounded-3xl bg-brand-surface border border-brand-border"
+      className="group relative overflow-hidden rounded-3xl bg-brand-surface border border-brand-border transition-shadow duration-500"
     >
       <div className="aspect-[16/10] overflow-hidden">
         <motion.img 
@@ -277,15 +388,17 @@ const SectionHeading = ({ subtitle, title, description, centered = false }: { su
       >
         {subtitle}
       </motion.p>
-      <motion.h3 
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ delay: 0.1 }}
-        className="text-4xl md:text-5xl font-black text-brand-text mb-6"
-      >
-        {title}
-      </motion.h3>
+      <div className="overflow-hidden">
+        <motion.h3 
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          className="text-4xl md:text-5xl font-black text-brand-text mb-6"
+        >
+          {title}
+        </motion.h3>
+      </div>
       {description && (
         <motion.p 
           initial={{ opacity: 0, y: 20 }}
@@ -316,20 +429,30 @@ const Solutions = () => {
           {SERVICES.map((service, i) => (
             <motion.div
               key={i}
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1, duration: 0.5 }}
-              className="p-8 rounded-2xl bg-brand-surface border border-brand-border card-shadow-hover group"
+              whileHover={{ 
+                y: -10,
+                borderColor: '#2563eb',
+                backgroundColor: '#ffffff',
+                boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.05)"
+              }}
+              className="p-8 rounded-2xl bg-brand-surface border border-brand-border transition-all duration-300 group cursor-default"
             >
               <motion.div 
-                whileHover={{ rotate: 10, scale: 1.1 }}
+                whileHover={{ 
+                  rotate: 15,
+                  scale: 1.1,
+                }}
+                transition={{ type: "spring", stiffness: 300, damping: 10 }}
                 className="w-14 h-14 bg-blue-50 text-brand-accent rounded-xl flex items-center justify-center mb-6 group-hover:bg-brand-accent group-hover:text-white transition-colors duration-300"
               >
                 <service.icon className="w-8 h-8" />
               </motion.div>
-              <h4 className="text-xl font-bold text-brand-text mb-4">{service.title}</h4>
-              <p className="text-brand-muted leading-relaxed">
+              <h4 className="text-xl font-bold text-brand-text mb-4 group-hover:text-brand-accent transition-colors">{service.title}</h4>
+              <p className="text-brand-muted leading-relaxed group-hover:text-brand-text transition-colors">
                 {service.description}
               </p>
             </motion.div>
@@ -516,14 +639,22 @@ const Contact = () => {
 
 const Footer = () => {
   return (
-    <footer className="py-20 bg-white border-t border-brand-border">
+    <motion.footer 
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      className="py-20 bg-white border-t border-brand-border"
+    >
       <div className="container mx-auto px-6">
         <div className="grid md:grid-cols-4 gap-12 mb-16">
           <div className="col-span-2">
-            <div className="flex items-center gap-2 text-2xl font-bold tracking-tight mb-6">
+            <motion.div 
+              whileHover={{ scale: 1.02 }}
+              className="flex items-center gap-2 text-2xl font-bold tracking-tight mb-6 cursor-pointer"
+            >
               <Building2 className="w-8 h-8 text-brand-accent" />
               <span>AURA<span className="text-brand-accent">CONSULTING</span></span>
-            </div>
+            </motion.div>
             <p className="text-brand-muted text-lg max-w-sm">
               Empowering global enterprises through strategic innovation and data-driven excellence since 2008.
             </p>
@@ -531,46 +662,72 @@ const Footer = () => {
           <div>
             <h4 className="font-bold text-brand-text mb-6 uppercase tracking-wider text-sm">Solutions</h4>
             <ul className="space-y-4 text-brand-muted">
-              <li><a href="#" className="hover:text-brand-accent transition-colors">Strategy</a></li>
-              <li><a href="#" className="hover:text-brand-accent transition-colors">Technology</a></li>
-              <li><a href="#" className="hover:text-brand-accent transition-colors">Operations</a></li>
-              <li><a href="#" className="hover:text-brand-accent transition-colors">Risk</a></li>
+              {['Strategy', 'Technology', 'Operations', 'Risk'].map((item) => (
+                <li key={item}>
+                  <motion.a 
+                    href="#" 
+                    whileHover={{ x: 5, color: '#2563eb' }}
+                    className="transition-colors inline-block"
+                  >
+                    {item}
+                  </motion.a>
+                </li>
+              ))}
             </ul>
           </div>
           <div>
             <h4 className="font-bold text-brand-text mb-6 uppercase tracking-wider text-sm">Company</h4>
             <ul className="space-y-4 text-brand-muted">
-              <li><a href="#" className="hover:text-brand-accent transition-colors">About Us</a></li>
-              <li><a href="#" className="hover:text-brand-accent transition-colors">Case Studies</a></li>
-              <li><a href="#" className="hover:text-brand-accent transition-colors">Careers</a></li>
-              <li><a href="#" className="hover:text-brand-accent transition-colors">Contact</a></li>
+              {['About Us', 'Case Studies', 'Careers', 'Contact'].map((item) => (
+                <li key={item}>
+                  <motion.a 
+                    href="#" 
+                    whileHover={{ x: 5, color: '#2563eb' }}
+                    className="transition-colors inline-block"
+                  >
+                    {item}
+                  </motion.a>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
         <div className="pt-12 border-t border-brand-border flex flex-col md:flex-row justify-between items-center gap-8 text-brand-muted text-sm font-medium">
           <p>© 2024 AURA CONSULTING GROUP. ALL RIGHTS RESERVED.</p>
           <div className="flex gap-8">
-            <a href="#" className="hover:text-brand-text transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-brand-text transition-colors">Terms of Service</a>
-            <a href="#" className="hover:text-brand-text transition-colors">Cookie Policy</a>
+            {['Privacy Policy', 'Terms of Service', 'Cookie Policy'].map((item) => (
+              <motion.a 
+                key={item}
+                href="#" 
+                whileHover={{ color: '#0f172a' }}
+                className="transition-colors"
+              >
+                {item}
+              </motion.a>
+            ))}
           </div>
           <div className="flex gap-4">
             {[Linkedin, Twitter, Github].map((Icon, i) => (
-              <a key={i} href="#" className="hover:text-brand-accent transition-colors">
+              <motion.a 
+                key={i} 
+                href="#" 
+                whileHover={{ y: -3, color: '#2563eb' }}
+                className="transition-colors"
+              >
                 <Icon className="w-5 h-5" />
-              </a>
+              </motion.a>
             ))}
           </div>
         </div>
       </div>
-    </footer>
+    </motion.footer>
   );
 };
 
 export default function App() {
   useEffect(() => {
     const lenis = new Lenis({
-      duration: 1.2,
+      duration: 1.5, // Slightly longer duration for smoother feel
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: 'vertical',
       gestureOrientation: 'vertical',
