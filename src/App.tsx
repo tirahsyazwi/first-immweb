@@ -180,6 +180,46 @@ const Magnetic = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
+const CLIENTS = [
+  { name: "LogiTech", logo: "https://picsum.photos/seed/logo1/200/100" },
+  { name: "FinEdge", logo: "https://picsum.photos/seed/logo2/200/100" },
+  { name: "EcoPower", logo: "https://picsum.photos/seed/logo3/200/100" },
+  { name: "GlobalHealth", logo: "https://picsum.photos/seed/logo4/200/100" },
+  { name: "TechNova", logo: "https://picsum.photos/seed/logo5/200/100" },
+  { name: "SkyNet", logo: "https://picsum.photos/seed/logo6/200/100" },
+];
+
+const Clientele = () => {
+  return (
+    <section className="py-20 bg-white/30 backdrop-blur-sm border-y border-brand-border overflow-hidden">
+      <div className="container mx-auto px-6 mb-12">
+        <p className="text-center text-brand-muted font-bold text-sm uppercase tracking-[0.3em]">
+          Trusted by Industry Leaders
+        </p>
+      </div>
+      
+      <div className="flex overflow-hidden group">
+        <motion.div 
+          animate={{ x: ["0%", "-50%"] }}
+          transition={{ 
+            duration: 30, 
+            repeat: Infinity, 
+            ease: "linear" 
+          }}
+          className="flex gap-20 items-center whitespace-nowrap px-10"
+        >
+          {[...CLIENTS, ...CLIENTS].map((client, i) => (
+            <div key={i} className="flex items-center gap-4 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-500 cursor-default">
+              <img src={client.logo} alt={client.name} className="h-12 w-auto object-contain" referrerPolicy="no-referrer" />
+              <span className="text-2xl font-black text-brand-text/20">{client.name}</span>
+            </div>
+          ))}
+        </motion.div>
+      </div>
+    </section>
+  );
+};
+
 const Hero = () => {
   const { scrollY } = useScroll();
   
@@ -195,7 +235,7 @@ const Hero = () => {
   const rotate = useTransform(smoothScrollY, [0, 500], [0, 5]);
 
   return (
-    <section className="relative min-h-screen flex items-center pt-20 overflow-hidden bg-brand-surface">
+    <section className="relative min-h-screen flex items-center pt-20 overflow-hidden">
       <div className="container mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center relative z-10">
         <motion.div
           initial={{ opacity: 0, x: -30 }}
@@ -320,7 +360,7 @@ const Hero = () => {
       {/* Background patterns */}
       <motion.div 
         style={{ y: y1 }}
-        className="absolute top-0 right-0 w-1/2 h-full bg-blue-50/30 -skew-x-12 translate-x-1/4 z-0" 
+        className="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-blue-50/50 via-transparent to-transparent z-0" 
       />
     </section>
   );
@@ -362,7 +402,7 @@ const CaseStudyCard = ({ study, index }: any) => {
           referrerPolicy="no-referrer"
         />
       </div>
-      <div className="p-8 bg-white relative z-10">
+      <div className="p-8 bg-white/80 backdrop-blur-md relative z-10">
         <p className="text-brand-accent font-bold text-xs uppercase tracking-widest mb-2">{study.category}</p>
         <h4 className="text-2xl font-bold text-brand-text mb-4">{study.title}</h4>
         <div className="flex justify-between items-center">
@@ -416,8 +456,9 @@ const SectionHeading = ({ subtitle, title, description, centered = false }: { su
 
 const Solutions = () => {
   return (
-    <section id="solutions" className="py-32 bg-white overflow-hidden">
-      <div className="container mx-auto px-6">
+    <section id="solutions" className="py-32 overflow-hidden relative">
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-blue-50/20 to-transparent pointer-events-none" />
+      <div className="container mx-auto px-6 relative z-10">
         <SectionHeading 
           subtitle="Our Expertise"
           title="Comprehensive Solutions for Complex Challenges"
@@ -465,8 +506,9 @@ const Solutions = () => {
 
 const CaseStudies = () => {
   return (
-    <section id="case-studies" className="py-32 bg-brand-surface">
-      <div className="container mx-auto px-6">
+    <section id="case-studies" className="py-32 relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-50/50 to-transparent pointer-events-none" />
+      <div className="container mx-auto px-6 relative z-10">
         <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
           <SectionHeading 
             subtitle="Case Studies"
@@ -494,8 +536,8 @@ const CaseStudies = () => {
 
 const About = () => {
   return (
-    <section id="about" className="py-32 bg-white overflow-hidden">
-      <div className="container mx-auto px-6 grid lg:grid-cols-2 gap-20 items-center">
+    <section id="about" className="py-32 overflow-hidden relative">
+      <div className="container mx-auto px-6 grid lg:grid-cols-2 gap-20 items-center relative z-10">
         <div className="relative">
           <div className="grid grid-cols-2 gap-4">
             <motion.div 
@@ -577,9 +619,10 @@ const About = () => {
 
 const Contact = () => {
   return (
-    <section id="contact" className="py-32 bg-brand-surface">
-      <div className="container mx-auto px-6">
-        <div className="max-w-5xl mx-auto bg-white rounded-[3rem] overflow-hidden shadow-2xl border border-brand-border flex flex-col md:flex-row">
+    <section id="contact" className="py-32 relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-t from-blue-50/30 to-transparent pointer-events-none" />
+      <div className="container mx-auto px-6 relative z-10">
+        <div className="max-w-5xl mx-auto bg-white/90 backdrop-blur-xl rounded-[3rem] overflow-hidden shadow-2xl border border-brand-border flex flex-col md:flex-row">
           <div className="md:w-1/2 p-12 lg:p-20 bg-brand-text text-white">
             <h2 className="text-4xl font-black mb-8">Ready to transform your business?</h2>
             <p className="text-slate-400 text-lg mb-12">
@@ -643,9 +686,9 @@ const Footer = () => {
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="py-20 bg-white border-t border-brand-border"
+      className="py-20 border-t border-brand-border relative overflow-hidden"
     >
-      <div className="container mx-auto px-6">
+      <div className="container mx-auto px-6 relative z-10">
         <div className="grid md:grid-cols-4 gap-12 mb-16">
           <div className="col-span-2">
             <motion.div 
@@ -753,8 +796,50 @@ export default function App() {
     <div className="relative bg-brand-bg min-h-screen">
       <Navbar />
       
-      <main>
+      {/* Immersive Background Blobs */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <motion.div 
+          animate={{ 
+            x: [0, 150, -100, 0],
+            y: [0, 100, 50, 0],
+            scale: [1, 1.3, 0.8, 1],
+            rotate: [0, 90, 180, 0]
+          }}
+          transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+          className="absolute -top-[15%] -left-[15%] w-[50%] h-[50%] bg-blue-200/20 rounded-full blur-[140px]"
+        />
+        <motion.div 
+          animate={{ 
+            x: [0, -120, 80, 0],
+            y: [0, 150, -50, 0],
+            scale: [1, 1.2, 1.1, 1],
+            rotate: [0, -45, 45, 0]
+          }}
+          transition={{ duration: 35, repeat: Infinity, ease: "linear" }}
+          className="absolute top-[30%] -right-[10%] w-[45%] h-[45%] bg-indigo-100/30 rounded-full blur-[120px]"
+        />
+        <motion.div 
+          animate={{ 
+            x: [0, 80, -80, 0],
+            y: [0, -100, 100, 0],
+            scale: [1, 0.9, 1.2, 1]
+          }}
+          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+          className="absolute -bottom-[15%] left-[15%] w-[40%] h-[40%] bg-blue-50/40 rounded-full blur-[130px]"
+        />
+        <motion.div 
+          animate={{ 
+            opacity: [0.1, 0.3, 0.1],
+            scale: [1, 1.5, 1]
+          }}
+          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[60%] bg-slate-100/10 rounded-full blur-[150px]"
+        />
+      </div>
+
+      <main className="relative z-10">
         <Hero />
+        <Clientele />
         <Solutions />
         <CaseStudies />
         <About />
